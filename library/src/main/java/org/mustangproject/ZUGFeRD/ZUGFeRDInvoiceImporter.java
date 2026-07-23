@@ -1457,8 +1457,8 @@ public class ZUGFeRDInvoiceImporter {
 							+ Stream.of(tc.trans.getZFItems())
 							.map(item -> item.getCalculation().getItemTotalNetAmount().toPlainString())
 							.collect(Collectors.joining(" + "));
-						if (tc.trans.getRoundingAmount()!=null) {
-							moreDetails += " and rounding amount "+tc.trans.getRoundingAmount().toPlainString();
+						if (tc.trans.getRoundingAmount() != null) {
+							moreDetails += " and rounding amount " + tc.trans.getRoundingAmount().toPlainString();
 						}
 					} catch (Exception ignored) {
 						// ignore
