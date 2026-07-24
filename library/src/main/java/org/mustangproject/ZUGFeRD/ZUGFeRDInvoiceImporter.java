@@ -977,7 +977,7 @@ public class ZUGFeRDInvoiceImporter {
 						if ((periodChilds.item(periodChildIndex).getLocalName() != null) && (periodChilds.item(periodChildIndex).getLocalName().equals("EndDateTime"))) {
 							NodeList endPeriodChilds = periodChilds.item(periodChildIndex).getChildNodes();
 							for (int endPeriodIndex = 0; endPeriodIndex < endPeriodChilds.getLength(); endPeriodIndex++) {
-								if ((endPeriodChilds.item(endPeriodIndex).getLocalName() != null) && (endPeriodChilds.item(endPeriodIndex).getLocalName().equals("DateTimeString"))) {//CII
+								if (endPeriodChilds.item(endPeriodIndex).getLocalName() != null && endPeriodChilds.item(endPeriodIndex).getLocalName().equals("DateTimeString")) { //CII
 									deliveryPeriodEnd = XMLTools.trimOrNull(endPeriodChilds.item(endPeriodIndex));
 								}
 							}
