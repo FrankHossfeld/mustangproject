@@ -21,14 +21,24 @@
 package org.mustangproject;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import org.mustangproject.ZUGFeRD.*;
+import org.mustangproject.ZUGFeRD.IExportableTransaction;
+import org.mustangproject.ZUGFeRD.IReferencedDocument;
+import org.mustangproject.ZUGFeRD.IZUGFeRDAllowanceCharge;
+import org.mustangproject.ZUGFeRD.IZUGFeRDExportableItem;
+import org.mustangproject.ZUGFeRD.IZUGFeRDLogisticsServiceCharge;
+import org.mustangproject.ZUGFeRD.IZUGFeRDPaymentTerms;
+import org.mustangproject.ZUGFeRD.IZUGFeRDTradeSettlement;
 import org.mustangproject.ZUGFeRD.model.DocumentCodeTypeConstants;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /***
@@ -40,24 +50,22 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 public class Invoice implements IExportableTransaction {
 
 	protected boolean testIndicator;
-	protected String documentName = null, documentCode = null, number = null, ownOrganisationFullPlaintextInfo = null, referenceNumber = null, shipToOrganisationID = null, shipToOrganisationName = null, shipToStreet = null, shipToZIP = null, shipToLocation = null, shipToCountry = null, buyerOrderReferencedDocumentID = null, ownForeignOrganisationID = null, ownOrganisationName = null, currency = null, paymentTermDescription = null;
-//	protected String documentName = null, documentCode = null, number = null, ownOrganisationFullPlaintextInfo = null, referenceNumber = null, shipToOrganisationID = null, shipToOrganisationName = null, shipToStreet = null, shipToZIP = null, shipToLocation = null, shipToCountry = null, buyerOrderReferencedDocumentID = null, buyerOrderReferencedDocumentIssueDateTime = null, ownForeignOrganisationID = null, ownOrganisationName = null, currency = null, paymentTermDescription = null;
-	protected String taxCurrency;
+	protected String documentName, documentCode, number, ownOrganisationFullPlaintextInfo, referenceNumber, shipToOrganisationID, shipToOrganisationName, shipToStreet, shipToZIP, shipToLocation, shipToCountry, ownForeignOrganisationID, ownOrganisationName, currency, paymentTermDescription;
 	protected String deliveryTypeCode;
-	protected Date issueDate = null, dueDate = null, deliveryDate = null, buyerOrderReferencedDocumentIssueDateTime = null;
-	protected TradeParty sender = null, recipient = null, deliveryAddress = null, endCustomerDeliveryAddress = null, payee = null, invoicer = null, invoicee = null;
-	protected ArrayList<CashDiscount> cashDiscounts = null;
+	protected Date issueDate, dueDate, deliveryDate;
+	protected TradeParty sender, recipient, deliveryAddress, endCustomerDeliveryAddress, payee, invoicer, invoicee;
+	protected ArrayList<CashDiscount> cashDiscounts;
 	@JsonDeserialize(contentAs = Item.class)
-	protected List<IZUGFeRDExportableItem> zfItems = null;
-	protected ArrayList<String> notes = null;
-	private List<IncludedNote> includedNotes = null;
-	protected String sellerOrderReferencedDocumentID;
-	protected String contractReferencedDocument = null;
-	protected ArrayList<FileAttachment> xmlEmbeddedFiles = null;
+	protected List<IZUGFeRDExportableItem> zfItems;
+	protected ArrayList<String> notes;
+	protected ReferencedDocument sellerOrderReferencedDocument;
+	protected ReferencedDocument buyerOrderReferencedDocument;
+	protected ReferencedDocument contractReferencedDocument;
+	protected ArrayList<FileAttachment> xmlEmbeddedFiles;
 
-	protected BigDecimal totalPrepaidAmount = null;
-	protected Date detailedDeliveryDateStart = null;
-	protected Date detailedDeliveryPeriodEnd = null;
+	protected BigDecimal totalPrepaidAmount;
+	protected Date detailedDeliveryDateStart;
+	protected Date detailedDeliveryPeriodEnd;
 	protected IReferencedDocument tenderReference; // TypeCode 50
 	protected IReferencedDocument objectIdentifierReferencedDocument; // TypeCode 130
 	protected IReferencedDocument relatedReferenceDocument; // TypeCode 916
@@ -66,21 +74,21 @@ public class Invoice implements IExportableTransaction {
 	protected ArrayList<IZUGFeRDLogisticsServiceCharge> logisticsServiceCharges = new ArrayList<>();
 	protected ArrayList<IZUGFeRDPaymentTerms> paymentTerms = new ArrayList<>();
 
-	protected String invoiceReferencedDocumentID = null;
-	protected Date invoiceReferencedIssueDate;
 	// New field for storing Invoiced Object Identifier (BG-3)
-	protected List<ReferencedDocument> invoiceReferencedDocuments = null;
+	protected List<ReferencedDocument> invoiceReferencedDocuments;
 
-	protected String specifiedProcuringProjectID = null;
-	protected String specifiedProcuringProjectName = null;
-	protected String despatchAdviceReferencedDocumentID = null;
-	protected String deliveryNoteReferencedDocumentID = null;
-	protected Date deliveryNoteReferencedDocumentDate = null;
-	protected String vatDueDateTypeCode = null;
+	protected String specifiedProcuringProjectID;
+	protected String specifiedProcuringProjectName;
+	protected ReferencedDocument despatchAdviceReferencedDocument;
+	protected ReferencedDocument deliveryNoteReferencedDocument;
+	protected String vatDueDateTypeCode;
 	protected String creditorReferenceID; // required when direct debit is used.
-	private BigDecimal roundingAmount=null;
+
+	private List<IncludedNote> includedNotes;
+	private BigDecimal roundingAmount;
 	private String paymentReference; // Remittance information / Verwendungszweck, BT-83
 	private String businessProcessId;
+
 	public Invoice() {
 		zfItems = new ArrayList<>();
 		cashDiscounts = new ArrayList<>();
@@ -103,7 +111,7 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	@Override
-	public String getContractReferencedDocument() {
+	public ReferencedDocument getContractReferencedDocument() {
 		return contractReferencedDocument;
 	}
 
@@ -145,7 +153,7 @@ public class Invoice implements IExportableTransaction {
 	 * @return fluent setter
 	 */
 	public Invoice setAdditionalReferencedDocuments(FileAttachment[] fileArr) {
-		if (fileArr!=null) {
+		if (fileArr != null) {
 			xmlEmbeddedFiles = new ArrayList<>(Arrays.asList(fileArr));
 		} else {
 			xmlEmbeddedFiles = new ArrayList<>();
@@ -225,17 +233,17 @@ public class Invoice implements IExportableTransaction {
 
 	@JsonIgnore
 	public Invoice setObjectIdentifierReferencedDocument(String id, String referenceTypeCode) {
-	    ReferencedDocument dr = new ReferencedDocument(id);
-	    dr.setReferenceTypeCode(referenceTypeCode);
-	    return setObjectIdentifierReferencedDocument(dr);
+		ReferencedDocument dr = new ReferencedDocument(id);
+		dr.setReferenceTypeCode(referenceTypeCode);
+		return setObjectIdentifierReferencedDocument(dr);
 	}
 
 	@JsonIgnore
 	public Invoice setObjectIdentifierReferencedDocument(String id, String referenceTypeCode, Date issueDate) {
-	    ReferencedDocument dr = new ReferencedDocument(id);
-	    dr.setReferenceTypeCode(referenceTypeCode);
-	    dr.setFormattedIssueDateTime(issueDate);
-	    return setObjectIdentifierReferencedDocument(dr);
+		ReferencedDocument dr = new ReferencedDocument(id);
+		dr.setReferenceTypeCode(referenceTypeCode);
+		dr.setFormattedIssueDateTime(issueDate);
+		return setObjectIdentifierReferencedDocument(dr);
 	}
 
 	@Override
@@ -259,17 +267,17 @@ public class Invoice implements IExportableTransaction {
 
 	@JsonIgnore
 	public Invoice setRelatedReferencedDocument(String id, String referenceTypeCode) {
-	    ReferencedDocument dr = new ReferencedDocument(id);
-	    dr.setReferenceTypeCode(referenceTypeCode);
-	    return setRelatedReferencedDocument(dr);
+		ReferencedDocument dr = new ReferencedDocument(id);
+		dr.setReferenceTypeCode(referenceTypeCode);
+		return setRelatedReferencedDocument(dr);
 	}
 
 	@JsonIgnore
 	public Invoice setRelatedReferencedDocument(String id, String referenceTypeCode, Date issueDate) {
-	    ReferencedDocument dr = new ReferencedDocument(id);
-	    dr.setReferenceTypeCode(referenceTypeCode);
-	    dr.setFormattedIssueDateTime(issueDate);
-	    return setRelatedReferencedDocument(dr);
+		ReferencedDocument dr = new ReferencedDocument(id);
+		dr.setReferenceTypeCode(referenceTypeCode);
+		dr.setFormattedIssueDateTime(issueDate);
+		return setRelatedReferencedDocument(dr);
 	}
 
 
@@ -394,19 +402,38 @@ public class Invoice implements IExportableTransaction {
 		return this;
 	}
 
-	@Override
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public String getBuyerOrderReferencedDocumentID() {
-		return buyerOrderReferencedDocumentID;
+		if (buyerOrderReferencedDocument == null) {
+			return null;
+		} else {
+			return buyerOrderReferencedDocument.getIssuerAssignedID();
+		}
 	}
 
-	@Override
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public String getSellerOrderReferencedDocumentID() {
-		return sellerOrderReferencedDocumentID;
+		if (sellerOrderReferencedDocument == null) {
+			return null;
+		} else {
+			return sellerOrderReferencedDocument.getIssuerAssignedID();
+		}
 	}
 
-
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public Invoice setSellerOrderReferencedDocumentID(String sellerOrderReferencedDocumentID) {
-		this.sellerOrderReferencedDocumentID = sellerOrderReferencedDocumentID;
+		if (sellerOrderReferencedDocument == null) {
+			sellerOrderReferencedDocument = new ReferencedDocument();
+		}
+		this.sellerOrderReferencedDocument.setIssuerAssignedID(sellerOrderReferencedDocumentID);
+		return this;
+	}
+
+	/**
+	 * @param sellerOrderReferencedDocument the sellerOrderReferencedDocument to set
+	 */
+	public Invoice setSellerOrderReferencedDocument(ReferencedDocument sellerOrderReferencedDocument) {
+		this.sellerOrderReferencedDocument = sellerOrderReferencedDocument;
 		return this;
 	}
 
@@ -415,9 +442,31 @@ public class Invoice implements IExportableTransaction {
 	 * @param buyerOrderReferencedDocumentID string with number
 	 * @return fluent setter
 	 */
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public Invoice setBuyerOrderReferencedDocumentID(String buyerOrderReferencedDocumentID) {
-		this.buyerOrderReferencedDocumentID = buyerOrderReferencedDocumentID;
+		if (buyerOrderReferencedDocument == null) {
+			buyerOrderReferencedDocument = new ReferencedDocument();
+		}
+		this.buyerOrderReferencedDocument.setIssuerAssignedID(buyerOrderReferencedDocumentID);
 		return this;
+	}
+
+	@Override
+	public ReferencedDocument getBuyerOrderReferencedDocument() {
+		return buyerOrderReferencedDocument;
+	}
+
+	/**
+	 * @param buyerOrderReferencedDocument the buyerOrderReferencedDocument to set
+	 */
+	public Invoice setBuyerOrderReferencedDocument(ReferencedDocument buyerOrderReferencedDocument) {
+		this.buyerOrderReferencedDocument = buyerOrderReferencedDocument;
+		return this;
+	}
+
+	@Override
+	public ReferencedDocument getSellerOrderReferencedDocument() {
+		return sellerOrderReferencedDocument;
 	}
 
 	/***
@@ -425,29 +474,61 @@ public class Invoice implements IExportableTransaction {
 	 * @param invoiceReferencedDocumentID string with number
 	 * @return fluent setter
 	 */
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public Invoice setInvoiceReferencedDocumentID(String invoiceReferencedDocumentID) {
-		this.invoiceReferencedDocumentID = invoiceReferencedDocumentID;
+		if (invoiceReferencedDocuments == null) {
+			invoiceReferencedDocuments = new ArrayList<>();
+		}
+		if (invoiceReferencedDocuments.isEmpty()) {
+			invoiceReferencedDocuments.add(new ReferencedDocument());
+		}
+		this.invoiceReferencedDocuments.get(0).setIssuerAssignedID(invoiceReferencedDocumentID);
 		return this;
 	}
 
+	@Deprecated
 	@Override
+	@SuppressWarnings("removal")
 	public String getInvoiceReferencedDocumentID() {
-		return invoiceReferencedDocumentID;
+		if (this.invoiceReferencedDocuments == null || this.invoiceReferencedDocuments.isEmpty() ) {
+			return null;
+		} else {
+			return this.invoiceReferencedDocuments.get(0).getIssuerAssignedID();
+		}
 	}
 
+	@Deprecated
 	@Override
+	@SuppressWarnings("removal")
 	public Date getInvoiceReferencedIssueDate() {
-		return invoiceReferencedIssueDate;
+		if (this.invoiceReferencedDocuments == null || this.invoiceReferencedDocuments.isEmpty() ) {
+			return null;
+		} else {
+			return this.invoiceReferencedDocuments.get(0).getFormattedIssueDateTime();
+		}
 	}
 
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public Invoice setInvoiceReferencedIssueDate(Date issueDate) {
-		this.invoiceReferencedIssueDate = issueDate;
+		if (invoiceReferencedDocuments == null) {
+			invoiceReferencedDocuments = new ArrayList<>();
+		}
+		if (invoiceReferencedDocuments.isEmpty()) {
+			invoiceReferencedDocuments.add(new ReferencedDocument());
+		}
+		this.invoiceReferencedDocuments.get(0).setFormattedIssueDateTime(issueDate);
 		return this;
 	}
 
 	@Override
+	@Deprecated(forRemoval = true, since = "2.24.1")
+	@SuppressWarnings("removal")
 	public Date getBuyerOrderReferencedDocumentIssueDateTime() {
-		return buyerOrderReferencedDocumentIssueDateTime;
+		if (this.buyerOrderReferencedDocument == null ) {
+			return null;
+		} else {
+			return this.buyerOrderReferencedDocument.getFormattedIssueDateTime();
+		}
 	}
 
 
@@ -472,7 +553,10 @@ public class Invoice implements IExportableTransaction {
 	 * @return fluent setter
 	 */
 	public Invoice setBuyerOrderReferencedDocumentIssueDateTime(Date buyerOrderReferencedDocumentIssueDateTime) {
-		this.buyerOrderReferencedDocumentIssueDateTime = buyerOrderReferencedDocumentIssueDateTime;
+		if (buyerOrderReferencedDocument == null) {
+			buyerOrderReferencedDocument = new ReferencedDocument();
+		}
+		this.buyerOrderReferencedDocument.setFormattedIssueDateTime(buyerOrderReferencedDocumentIssueDateTime);
 		return this;
 	}
 
@@ -581,7 +665,7 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	public Invoice setNotesWithSubjectCode(List<IncludedNote> theList) {
-		includedNotes=theList;
+		includedNotes = theList;
 		return this;
 	}
 
@@ -593,16 +677,6 @@ public class Invoice implements IExportableTransaction {
 	public Invoice setCurrency(String currency) {
 		this.currency = currency;
 		return this;
-	}
-
-	public Invoice setTaxCurrency(String taxCurrency) {
-		this.taxCurrency = taxCurrency;
-		return this;
-	}
-
-	@Override
-	public String getTaxCurrency() {
-		return taxCurrency;
 	}
 
 	@Override
@@ -666,21 +740,8 @@ public class Invoice implements IExportableTransaction {
 	 * @return fluent setter
 	 */
 	public Invoice setRoundingAmount(BigDecimal amount) {
-		 roundingAmount=amount;
+		 roundingAmount = amount;
 		 return this;
-	}
-
-	/***
-	 * sets a named sender contact
-	 * @deprecated use setSender
-	 * @see Contact
-	 * @param ownContact the sender contact
-	 * @return fluent setter
-	 */
-	@Deprecated
-	public Invoice setOwnContact(Contact ownContact) {
-		this.sender.setContact(ownContact);
-		return this;
 	}
 
 	@Override
@@ -770,7 +831,7 @@ public class Invoice implements IExportableTransaction {
 	 * @return fluent setter
 	 */
 	public Invoice setZFCharges(Charge[] iza) {
-		charges=new ArrayList<>();
+		charges = new ArrayList<>();
 		charges.addAll(Arrays.asList(iza));
 		return this;
 	}
@@ -818,8 +879,7 @@ public class Invoice implements IExportableTransaction {
 	public Invoice setPaymentTerms(IZUGFeRDPaymentTerms paymentTerm) {
 		if (paymentTerms.isEmpty()) {
 			paymentTerms.add(paymentTerm);
-		}
-		else {
+		} else {
 			paymentTerms.set(0, paymentTerm);
 		}
 		return this;
@@ -1014,8 +1074,8 @@ public class Invoice implements IExportableTransaction {
 	 * @param s the contract number
 	 * @return fluent setter
 	 */
-	public Invoice setContractReferencedDocument(String s) {
-		contractReferencedDocument = s;
+	public Invoice setContractReferencedDocument(ReferencedDocument rd) {
+		contractReferencedDocument = rd;
 		return this;
 	}
 
@@ -1042,7 +1102,7 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	public Invoice setDetailedDeliveryPeriodFrom(Date dt) {
-		detailedDeliveryDateStart=dt;
+		detailedDeliveryDateStart = dt;
 		return this;
 	}
 
@@ -1052,7 +1112,7 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	public Invoice setDetailedDeliveryPeriodTo(Date dt) {
-		detailedDeliveryPeriodEnd=dt;
+		detailedDeliveryPeriodEnd = dt;
 		return this;
 	}
 
@@ -1211,39 +1271,121 @@ public class Invoice implements IExportableTransaction {
 		return this;
 	}
 
+	/**
+	 * @deprecated use getDespatchAdviceReferenced.getIssuerAssignedID
+	 */
+	@SuppressWarnings("removal")
 	@Override
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public String getDespatchAdviceReferencedDocumentID() {
-		return despatchAdviceReferencedDocumentID;
+		if (this.despatchAdviceReferencedDocument == null) {
+			return null;
+		} else {
+			return despatchAdviceReferencedDocument.getIssuerAssignedID();
+		}
 	}
 
-
+	/**
+	 * @deprecated use setDespatchAdviceReferenced / getDespatchAdviceReferenced.setIssuerAssignedID
+	 * @param despatchAdviceReferencedDocumentID
+	 * @return
+	 */
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public Invoice setDespatchAdviceReferencedDocumentID(String despatchAdviceReferencedDocumentID) {
-		this.despatchAdviceReferencedDocumentID = despatchAdviceReferencedDocumentID;
+		if (this.despatchAdviceReferencedDocument == null) {
+			this.despatchAdviceReferencedDocument = new ReferencedDocument();
+		}
+		this.despatchAdviceReferencedDocument.setIssuerAssignedID(despatchAdviceReferencedDocumentID);
 		return this;
 	}
 
+	/**
+	 * @deprecated use getDeliveryNoteReferencedDocument.getIssuerAssignedID
+	 */
+	@SuppressWarnings("removal")
 	@Override
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public String getDeliveryNoteReferencedDocumentID() {
-		return deliveryNoteReferencedDocumentID;
+		if (this.deliveryNoteReferencedDocument == null) {
+			return null;
+		} else {
+			return deliveryNoteReferencedDocument.getIssuerAssignedID();
+		}
 	}
 
-
+	/**
+	 * @deprecated use setDeliveryNoteReferenced / getDeliveryNoteReferenced.setIssuerAssignedID
+	 * @param deliveryNoteReferencedDocumentID
+	 * @return
+	 */
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public Invoice setDeliveryNoteReferencedDocumentID(String deliveryNoteReferencedDocumentID) {
-		this.deliveryNoteReferencedDocumentID = deliveryNoteReferencedDocumentID;
+		if (this.deliveryNoteReferencedDocument == null) {
+			this.deliveryNoteReferencedDocument = new ReferencedDocument();
+		}
+		this.deliveryNoteReferencedDocument.setIssuerAssignedID(deliveryNoteReferencedDocumentID);
 		return this;
 	}
 
+	/**
+	 * @deprecated use getDeliveryNoteReferenced.getFormattedIssueDateTime
+	 */
+	@SuppressWarnings("removal")
 	@Override
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public Date getDeliveryNoteReferencedDocumentDate() {
-		return deliveryNoteReferencedDocumentDate;
+		if (this.deliveryNoteReferencedDocument == null) {
+			return null;
+		} else {
+			return deliveryNoteReferencedDocument.getFormattedIssueDateTime();
+		}
 	}
 
-
+	/**
+	 * @deprecated use setDeliveryNoteReferenced / getDeliveryNoteReferenced.setFormattedIssueDateTime
+	 * @param deliveryNoteReferencedDocumentDate
+	 * @return
+	 */
+	@Deprecated(forRemoval = true, since = "2.24.1")
 	public Invoice setDeliveryNoteReferencedDocumentDate(Date deliveryNoteReferencedDocumentDate) {
-		this.deliveryNoteReferencedDocumentDate = deliveryNoteReferencedDocumentDate;
+		if (this.deliveryNoteReferencedDocument == null) {
+			this.deliveryNoteReferencedDocument = new ReferencedDocument();
+		}
+		this.deliveryNoteReferencedDocument.setFormattedIssueDateTime(deliveryNoteReferencedDocumentDate);
 		return this;
 	}
 
+	/**
+	 * @return the despatchAdviceReferencedDocument
+	 */
+	@Override
+	public ReferencedDocument getDespatchAdviceReferencedDocument() {
+		return despatchAdviceReferencedDocument;
+	}
+
+	/**
+	 * @param despatchAdviceReferencedDocument the despatchAdviceReferencedDocument to set
+	 */
+	public Invoice setDespatchAdviceReferencedDocument(ReferencedDocument despatchAdviceReferencedDocument) {
+		this.despatchAdviceReferencedDocument = despatchAdviceReferencedDocument;
+		return this;
+	}
+
+	/**
+	 * @return the deliveryNoteReferencedDocument
+	 */
+	@Override
+	public ReferencedDocument getDeliveryNoteReferencedDocument() {
+		return deliveryNoteReferencedDocument;
+	}
+
+	/**
+	 * @param deliveryNoteReferencedDocument the deliveryNoteReferencedDocument to set
+	 */
+	public Invoice setDeliveryNoteReferencedDocument(ReferencedDocument deliveryNoteReferencedDocument) {
+		this.deliveryNoteReferencedDocument = deliveryNoteReferencedDocument;
+		return this;
+	}
 
 	@Override
 	public String getSpecifiedProcuringProjectName() {
