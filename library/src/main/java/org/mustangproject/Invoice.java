@@ -1050,10 +1050,11 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	/***
-	 * adds a document level addition to the price
-	 * @see Charge
-	 * @param izac the charge to be applied
-	 * @return fluent setter
+	 *  adds a document level addition to the price
+	 *  @see Charge
+	 *
+	 * @param charge
+	 * @return  fluent setter
 	 */
 	public Invoice addLogisticServiceCharge(IZUGFeRDLogisticsServiceCharge charge) {
 		logisticsServiceCharges.add(charge);
@@ -1072,9 +1073,9 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	/***
-	 * adds the ID of a contract referenced in the invoice
-	 * @param s the contract number
-	 * @return fluent setter
+	 * adds a referenced in the invoice
+	 * @param rd the referenced Document
+	 * @return
 	 */
 	public Invoice setContractReferencedDocument(ReferencedDocument rd) {
 		contractReferencedDocument = rd;
@@ -1383,6 +1384,7 @@ public class Invoice implements IExportableTransaction {
 
 	/**
 	 * @param deliveryNoteReferencedDocument the deliveryNoteReferencedDocument to set
+	 * @return fluent setter
 	 */
 	public Invoice setDeliveryNoteReferencedDocument(ReferencedDocument deliveryNoteReferencedDocument) {
 		this.deliveryNoteReferencedDocument = deliveryNoteReferencedDocument;
