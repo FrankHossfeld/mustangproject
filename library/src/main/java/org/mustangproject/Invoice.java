@@ -617,6 +617,7 @@ public class Invoice implements IExportableTransaction {
 	/***
 	 * @deprecated use senders' TradeParty's name instead
 	 * @see TradeParty
+	 * @return fluent setter
 	 */
 	@Deprecated
 	public Invoice setOwnOrganisationName(String ownOrganisationName) {
@@ -738,7 +739,7 @@ public class Invoice implements IExportableTransaction {
 	/***
 	 * set the cent e.g. to reach the next 5ct mark for currencies in certain countries
 	 * e.g. in the Netherlands ("Rappenrundung")
-	 * @param amount
+	 * @param amount the decimal value to be added to the invoice due payable
 	 * @return fluent setter
 	 */
 	public Invoice setRoundingAmount(BigDecimal amount) {
@@ -900,7 +901,7 @@ public class Invoice implements IExportableTransaction {
 
 	/**
 	 * Set multiple payment terms when using the EXTENDED profile.
-	 * @return
+	 * @return fluent setter
 	 */
 	public Invoice addPaymentTerms(IZUGFeRDPaymentTerms paymentTerm) {
 		paymentTerms.add(paymentTerm);
@@ -1069,7 +1070,7 @@ public class Invoice implements IExportableTransaction {
 	 *  adds a document level addition to the price
 	 *  @see Charge
 	 *
-	 * @param charge
+	 * @param charge the Charge Object with either absolute or relative amount to be added
 	 * @return  fluent setter
 	 */
 	public Invoice addLogisticServiceCharge(IZUGFeRDLogisticsServiceCharge charge) {
@@ -1091,7 +1092,7 @@ public class Invoice implements IExportableTransaction {
 	/***
 	 * adds a referenced in the invoice
 	 * @param rd the referenced Document
-	 * @return
+	 * @return fluent setter
 	 */
 	public Invoice setContractReferencedDocument(ReferencedDocument rd) {
 		contractReferencedDocument = rd;
@@ -1307,7 +1308,7 @@ public class Invoice implements IExportableTransaction {
 	/**
 	 * @deprecated use setDespatchAdviceReferenced / getDespatchAdviceReferenced.setIssuerAssignedID
 	 * @param despatchAdviceReferencedDocumentID
-	 * @return
+	 * @return fluent setter
 	 */
 	@Deprecated(forRemoval = true, since = "2.24.1")
 	public Invoice setDespatchAdviceReferencedDocumentID(String despatchAdviceReferencedDocumentID) {
@@ -1334,8 +1335,8 @@ public class Invoice implements IExportableTransaction {
 
 	/**
 	 * @deprecated use setDeliveryNoteReferenced / getDeliveryNoteReferenced.setIssuerAssignedID
-	 * @param deliveryNoteReferencedDocumentID
-	 * @return
+	 * @param deliveryNoteReferencedDocumentID String with the ID
+	 * @return fluent setter
 	 */
 	@Deprecated(forRemoval = true, since = "2.24.1")
 	public Invoice setDeliveryNoteReferencedDocumentID(String deliveryNoteReferencedDocumentID) {
@@ -1384,6 +1385,7 @@ public class Invoice implements IExportableTransaction {
 
 	/**
 	 * @param despatchAdviceReferencedDocument the despatchAdviceReferencedDocument to set
+	 * @return fluent setter
 	 */
 	public Invoice setDespatchAdviceReferencedDocument(ReferencedDocument despatchAdviceReferencedDocument) {
 		this.despatchAdviceReferencedDocument = despatchAdviceReferencedDocument;
