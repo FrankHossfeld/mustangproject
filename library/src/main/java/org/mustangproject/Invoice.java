@@ -52,7 +52,7 @@ public class Invoice implements IExportableTransaction {
 	protected boolean testIndicator;
 	protected String documentName, documentCode, number, ownOrganisationFullPlaintextInfo, referenceNumber, shipToOrganisationID, shipToOrganisationName, shipToStreet, shipToZIP, shipToLocation, shipToCountry, ownForeignOrganisationID, ownOrganisationName, currency, paymentTermDescription;
 	protected String deliveryTypeCode;
-	protected Date issueDate, dueDate, deliveryDate;
+	protected Date issueDate, dueDate, deliveryDate, taxPointDate;
 	protected TradeParty sender, recipient, deliveryAddress, endCustomerDeliveryAddress, payee, invoicer, invoicee, taxRepresentative;
 	protected ArrayList<CashDiscount> cashDiscounts;
 	@JsonDeserialize(contentAs = Item.class)
@@ -721,6 +721,16 @@ public class Invoice implements IExportableTransaction {
 
 	public Invoice setDeliveryDate(Date deliveryDate) {
 		this.deliveryDate = deliveryDate;
+		return this;
+	}
+
+	@Override
+	public Date getTaxPointDate() {
+		return taxPointDate;
+	}
+
+	public Invoice setTaxPointDate(Date taxPointDate) {
+		this.taxPointDate = taxPointDate;
 		return this;
 	}
 
