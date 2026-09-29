@@ -993,6 +993,9 @@ public class ZUGFeRDInvoiceImporter {
 					}
 					if (IBAN != null) {
 						BankDetails bd = new BankDetails(IBAN);
+						if (paymentMeansCode != null) {
+							bd.setPaymentMeansCode(paymentMeansCode);
+						}
 						if (BIC != null) {
 							bd.setBIC(BIC);
 						}
