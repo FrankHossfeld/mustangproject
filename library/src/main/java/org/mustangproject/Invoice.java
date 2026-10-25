@@ -50,6 +50,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 public class Invoice implements IExportableTransaction {
 
 	protected boolean testIndicator;
+	protected String taxCurrency;
+	protected BigDecimal taxConversionRate;
+	protected Date taxConversionRateDateTime;
 	protected String documentName, documentCode, number, ownOrganisationFullPlaintextInfo, referenceNumber, shipToOrganisationID, shipToOrganisationName, shipToStreet, shipToZIP, shipToLocation, shipToCountry, ownForeignOrganisationID, ownOrganisationName, currency, paymentTermDescription;
 	protected String deliveryTypeCode;
 	protected Date issueDate, dueDate, deliveryDate, taxPointDate;
@@ -492,7 +495,6 @@ public class Invoice implements IExportableTransaction {
 
 	@Deprecated
 	@Override
-	@SuppressWarnings("removal")
 	public String getInvoiceReferencedDocumentID() {
 		if (this.invoiceReferencedDocuments == null || this.invoiceReferencedDocuments.isEmpty() ) {
 			return null;
@@ -503,7 +505,6 @@ public class Invoice implements IExportableTransaction {
 
 	@Deprecated
 	@Override
-	@SuppressWarnings("removal")
 	public Date getInvoiceReferencedIssueDate() {
 		if (this.invoiceReferencedDocuments == null || this.invoiceReferencedDocuments.isEmpty() ) {
 			return null;
@@ -526,7 +527,6 @@ public class Invoice implements IExportableTransaction {
 
 	@Override
 	@Deprecated(forRemoval = true, since = "2.24.1")
-	@SuppressWarnings("removal")
 	public Date getBuyerOrderReferencedDocumentIssueDateTime() {
 		if (this.buyerOrderReferencedDocument == null ) {
 			return null;
@@ -685,6 +685,36 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	@Override
+	public String getTaxCurrency() {
+		return taxCurrency;
+	}
+
+	public Invoice setTaxCurrency(String taxCurrency) {
+		this.taxCurrency = taxCurrency;
+		return this;
+	}
+
+	@Override
+	public BigDecimal getTaxConversionRate() {
+		return taxConversionRate;
+	}
+
+	public Invoice setTaxConversionRate(BigDecimal taxConversionRate) {
+		this.taxConversionRate = taxConversionRate;
+		return this;
+	}
+
+	@Override
+	public Date getTaxConversionRateDateTime() {
+		return taxConversionRateDateTime;
+	}
+
+	public Invoice setTaxConversionRateDateTime(Date taxConversionRateDateTime) {
+		this.taxConversionRateDateTime = taxConversionRateDateTime;
+		return this;
+	}
+
+	@Override
 	public String getPaymentTermDescription() {
 		return paymentTermDescription;
 	}
@@ -755,8 +785,8 @@ public class Invoice implements IExportableTransaction {
 	 * @return fluent setter
 	 */
 	public Invoice setRoundingAmount(BigDecimal amount) {
-		 roundingAmount = amount;
-		 return this;
+		roundingAmount = amount;
+		return this;
 	}
 
 	@Override
@@ -883,6 +913,7 @@ public class Invoice implements IExportableTransaction {
 	}
 
 
+	@JsonIgnore
 	@Override
 	public IZUGFeRDPaymentTerms getPaymentTerms() {
 		if (!paymentTerms.isEmpty()) {
@@ -900,6 +931,7 @@ public class Invoice implements IExportableTransaction {
 		return this;
 	}
 
+	@JsonIgnore
 	@Override
 	public IZUGFeRDPaymentTerms[] getExtendedPaymentTerms() {
 		return paymentTerms.toArray(new IZUGFeRDPaymentTerms[0]);
@@ -1306,7 +1338,6 @@ public class Invoice implements IExportableTransaction {
 	/**
 	 * @deprecated use getDespatchAdviceReferenced.getIssuerAssignedID
 	 */
-	@SuppressWarnings("removal")
 	@Override
 	@Deprecated(forRemoval = true, since = "2.24.1")
 	public String getDespatchAdviceReferencedDocumentID() {
@@ -1334,7 +1365,6 @@ public class Invoice implements IExportableTransaction {
 	/**
 	 * @deprecated use getDeliveryNoteReferencedDocument.getIssuerAssignedID
 	 */
-	@SuppressWarnings("removal")
 	@Override
 	@Deprecated(forRemoval = true, since = "2.24.1")
 	public String getDeliveryNoteReferencedDocumentID() {
@@ -1362,7 +1392,6 @@ public class Invoice implements IExportableTransaction {
 	/**
 	 * @deprecated use getDeliveryNoteReferenced.getFormattedIssueDateTime
 	 */
-	@SuppressWarnings("removal")
 	@Override
 	@Deprecated(forRemoval = true, since = "2.24.1")
 	public Date getDeliveryNoteReferencedDocumentDate() {
@@ -1458,22 +1487,22 @@ public class Invoice implements IExportableTransaction {
 	}
 
 	public Invoice setBusinessProcessId(String id) {
-  		this.businessProcessId = id;
-  		return this;
+		this.businessProcessId = id;
+		return this;
 	}
 
 	@Override
 	public String getBusinessProcessId() {
-  		return businessProcessId;
+		return businessProcessId;
 	}
 
 	public Invoice setAccountingReference(String id) {
-  		this.accountingReference = id;
-  		return this;
+		this.accountingReference = id;
+		return this;
 	}
 
 	@Override
 	public String getAccountingReference() {
-  		return accountingReference;
+		return accountingReference;
 	}
 }
